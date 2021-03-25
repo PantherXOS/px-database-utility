@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import time
 from datetime import datetime
 
 import psycopg2
@@ -46,11 +47,84 @@ def dump_schema(db: 'ConnectionDetails'):
         log.debug('Success')
     else:
         log.error(proc.stderr)
+        os.environ["PGPASSWORD"] = ''
         raise Exception(proc.stderr)
 
     os.environ["PGPASSWORD"] = ''
 
     return file
+
+
+def create_database(db: 'ConnectionDetails'):
+    log.info('=> Creating new database')
+    command = f'createdb --host={db.host} ' \
+        f'--port={db.port} ' \
+        f'--username={db.username} ' \
+        f'--no-password ' \
+        f'{db.dbname}'
+
+    print(command)
+
+    os.environ["PGPASSWORD"] = db.password
+
+    proc = subprocess.run(command, shell=True, capture_output=True)
+
+    if proc.returncode == 0:
+        log.debug('Success')
+    else:
+        log.error(proc.stderr)
+        os.environ["PGPASSWORD"] = ''
+        raise Exception(proc.stderr)
+
+    os.environ["PGPASSWORD"] = ''
+
+
+def restore_schema(db: 'ConnectionDetails', file: str):
+    all_database = get_all_database(db)
+    if db.dbname in all_database:
+        log.info('Found existing database. Overwriting.')
+    else:
+        create_database(db)
+
+    log.info('=> Loading database from {}'.format(file))
+    command = f'pg_restore --host={db.host} ' \
+        f'--port={db.port} ' \
+        f'--dbname={db.dbname} ' \
+        f'--username={db.username} ' \
+        f'--no-password ' \
+        f'--format=c ' \
+        f'--verbose ' \
+        f'--clean ' \
+        f'{file}'
+
+    print(command)
+
+    os.environ["PGPASSWORD"] = db.password
+
+    proc = subprocess.run(command, shell=True, capture_output=True)
+
+    if proc.returncode == 0:
+        log.debug('Success')
+    else:
+        log.error(proc.stderr)
+        os.environ["PGPASSWORD"] = ''
+        raise Exception(proc.stderr)
+
+    os.environ["PGPASSWORD"] = ''
+
+    return file
+
+
+def get_all_backup_database():
+    onlyfiles = [
+        f for f in os.listdir(
+            DEFAULT_DATABASE_DUMP_PATH
+        ) if os.path.isfile(os.path.join(DEFAULT_DATABASE_DUMP_PATH, f))
+    ]
+    onlyfiles_full_path = []
+    for file in onlyfiles:
+        onlyfiles_full_path.append('{}/{}'.format(DEFAULT_DATABASE_DUMP_PATH, file))
+    return onlyfiles_full_path
 
 
 def get_all_database(db: 'ConnectionDetails'):
@@ -91,3 +165,16 @@ def select_database(database_list):
 
     selected_database = input('Which database do you want to work with?: (number) ')
     return database_list[int(selected_database)]
+
+
+def select_database_backup(database_backup_list):
+    '''Prompt the user to select from a list of database'''
+
+    print('Found {} database. Select the one you would like to interact with.'.format(len(database_backup_list)))
+    count = 0
+    for file in database_backup_list:
+        print('{} {} - {}'.format(count, file, time.ctime(os.path.getctime(file))))
+        count += 1
+
+    selected_database = input('Which database do you want to work with?: (number) ')
+    return database_backup_list[int(selected_database)]

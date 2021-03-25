@@ -9,7 +9,7 @@ For now, we only support PostgreSQL.
 
 **Requirements**
 
-- `postgresql` (with `pg_dump`)
+- `postgresql` (with `pg_dump`, `pg_restore`, `createdb`)
 
 ```bash
 $ python3 -m venv venv
@@ -24,6 +24,8 @@ pip3 install https://source-git-pantherx-org.s3.eu-central-1.amazonaws.com/px-da
 ```
 
 ## Run
+
+### Backup
 
 Run with defaults, it will prompt for your desired DB:
 
@@ -54,6 +56,30 @@ px-db-util --operation BACKUP \
 --port 5432
 --username USER
 --password PASSWORD
+```
+
+### Restore
+
+To restore a database (creates new database if it does not exist):
+
+_This assumes that a backup is available at `/var/opt/px-database-utility/*`_
+
+```bash
+px-database-utility --operation RESTORE --database production
+```
+
+To restore a specific file (creates new database if does not exist):
+
+```bash
+px-database-utility --operation RESTORE --database production --file `ABSOLUTE_PATH.dmp`
+```
+
+### List
+
+To list all tables:
+
+```bash
+px-db-util -o LIST
 ```
 
 ### Misc

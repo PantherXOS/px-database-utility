@@ -6,7 +6,9 @@ import px_database_utility
 def main():
     res = px_database_utility.main()
     stdout.flush()
-    if isinstance(res, str):
+    if res is None:
+        pass
+    elif isinstance(res, str):
         stdout.write(res)
     else:
         stdout.buffer.write(res)
