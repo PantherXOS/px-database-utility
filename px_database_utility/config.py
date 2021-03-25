@@ -1,0 +1,1 @@
+DEFAULT_DATABASE_DUMP_PATH = '/var/opt/px-database-utility'
