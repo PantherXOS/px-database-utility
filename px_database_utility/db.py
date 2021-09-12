@@ -2,17 +2,18 @@ import logging
 import os
 import subprocess
 import time
-from datetime import datetime
 
 import psycopg2
-from psycopg2 import OperationalError, connect
+from psycopg2 import OperationalError
 
 from .config import DEFAULT_DATABASE_DUMP_PATH
+from .classes import ConnectionDetails
 
 log = logging.getLogger(__name__)
 
 
 def get_connection_string(db: 'ConnectionDetails'):
+    '''Assemble connection string from connection details'''
     conn_string = 'postgres://{}:{}@{}:{}'.format(
         db.username, db.password, db.host, db.port
     )
@@ -27,7 +28,9 @@ def create_dump_path_if_does_not_exist(path: str):
 
 def dump_schema(db: 'ConnectionDetails'):
     '''Dump selected database to file'''
-    filename = "{}_{}.dmp".format(db.dbname, int(datetime.utcnow().timestamp()*1e3))
+    filename = "{}_{}.dmp".format(
+        round(time.time()), db.dbname
+    )
     create_dump_path_if_does_not_exist(DEFAULT_DATABASE_DUMP_PATH)
     file = '{}/{}'.format(DEFAULT_DATABASE_DUMP_PATH, filename)
     log.info('=> Dumping database to {}'.format(file))
@@ -56,6 +59,7 @@ def dump_schema(db: 'ConnectionDetails'):
 
 
 def create_database(db: 'ConnectionDetails'):
+    '''Create a new database from connection details'''
     log.info('=> Creating new database')
     command = f'createdb --host={db.host} ' \
         f'--port={db.port} ' \
@@ -80,6 +84,7 @@ def create_database(db: 'ConnectionDetails'):
 
 
 def restore_schema(db: 'ConnectionDetails', file: str):
+    '''Restore a database from connection details and backup. Overwrites existing.'''
     all_database = get_all_database(db)
     if db.dbname in all_database:
         log.info('Found existing database. Overwriting.')
@@ -116,6 +121,7 @@ def restore_schema(db: 'ConnectionDetails', file: str):
 
 
 def get_all_backup_database():
+    '''Get a list of available database backups'''
     onlyfiles = [
         f for f in os.listdir(
             DEFAULT_DATABASE_DUMP_PATH
@@ -123,7 +129,8 @@ def get_all_backup_database():
     ]
     onlyfiles_full_path = []
     for file in onlyfiles:
-        onlyfiles_full_path.append('{}/{}'.format(DEFAULT_DATABASE_DUMP_PATH, file))
+        onlyfiles_full_path.append(
+            '{}/{}'.format(DEFAULT_DATABASE_DUMP_PATH, file))
     return onlyfiles_full_path
 
 
@@ -157,24 +164,30 @@ def get_all_database(db: 'ConnectionDetails'):
 def select_database(database_list):
     '''Prompt the user to select from a list of database'''
 
-    print('Found {} database. Select the one you would like to interact with.'.format(len(database_list)))
+    print('Found {} database. Select the one you would like to interact with.'.format(
+        len(database_list))
+	)
     count = 0
     for db in database_list:
         print('{} {}'.format(count, db))
         count += 1
 
-    selected_database = input('Which database do you want to work with?: (number) ')
+    selected_database = input(
+        'Which database do you want to work with?: (number) '
+	)
     return database_list[int(selected_database)]
 
 
 def select_database_backup(database_backup_list):
     '''Prompt the user to select from a list of database'''
 
-    print('Found {} database. Select the one you would like to interact with.'.format(len(database_backup_list)))
+    print('Found {} database. Select the one you would like to interact with.'.format(
+        len(database_backup_list)))
     count = 0
     for file in database_backup_list:
         print('{} {} - {}'.format(count, file, time.ctime(os.path.getctime(file))))
         count += 1
 
-    selected_database = input('Which database do you want to work with?: (number) ')
+    selected_database = input(
+        'Which database do you want to work with?: (number) ')
     return database_backup_list[int(selected_database)]

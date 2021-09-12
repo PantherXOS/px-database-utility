@@ -2,8 +2,11 @@
 
 Designed to make working with local databases more convenient.
 
-For now, we only support PostgreSQL.
+At the moment only PostgreSQL is supported.
 
+- By default only the 5 latest backups for each database (by name) are stored.
+- Backups are stored at `/var/opt/px-database-utility`
+- Supported database names may include `_` or `-`. For ex. `primaryDatabase`, `primary_database`, `primary-database`
 
 ## Setup
 
@@ -27,6 +30,13 @@ pip3 install https://source-git-pantherx-org.s3.eu-central-1.amazonaws.com/px-da
 
 ### Backup
 
+There's two ways to run this:
+
+```bash
+px-database-utility
+px-db-util
+```
+
 Run with defaults, it will prompt for your desired DB:
 
 ```bash
@@ -45,7 +55,7 @@ Backup all DB:
 px-db-util --operation BACKUP --database ALL
 ```
 
-**Default backup location**: `/var/opt/px-database-utility/DBNAME_UNIXTIMESTAMP.dmp`
+**Default backup location**: `/var/opt/px-database-utility/DBNAME_UNIXTIMESTAMP.dmp` (timestamp is in seconds)
 
 For non-default database location:
 
