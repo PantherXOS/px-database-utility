@@ -14,10 +14,10 @@ At the moment only PostgreSQL is supported.
 
 - `postgresql` (with `pg_dump`, `pg_restore`, `createdb`)
 
+### Install on PantherX OS
+
 ```bash
-$ python3 -m venv venv
-$ source venv/bin/activate
-$ pip install .
+guix package -i px-database-utility
 ```
 
 ### Install with pip package manager
@@ -96,8 +96,16 @@ px-db-util -o LIST
 
 Development
 
-```
+```bash
 guix environment \
 --pure python \
---ad-hoc python-exitstatus-2.0.1 python-setuptools
+--ad-hoc psycopg2-binary python-setuptools
+```
+
+and
+
+```bash
+$ python3 -m venv venv
+$ source venv/bin/activate
+$ pip install .
 ```
