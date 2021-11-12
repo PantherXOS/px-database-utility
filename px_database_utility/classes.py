@@ -7,3 +7,4 @@ class ConnectionDetails:
     dbname: str = ''
     username: str = 'postgres'
     password: str = 'postgres'
+    no_owner: bool = False

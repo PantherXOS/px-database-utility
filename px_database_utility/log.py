@@ -1,3 +1,4 @@
+import getpass
 import logging
 from logging.handlers import RotatingFileHandler, SysLogHandler
 from platform import system
@@ -15,10 +16,13 @@ if opsys == 'Linux':
     import syslog
 
     # On Linux we log all events to file
-    fh = RotatingFileHandler('/var/log/px-database-utility.log', maxBytes=10000, backupCount=1)
-    fh.setLevel(logging.INFO)
-    fh.setFormatter(formatter)
-    log.addHandler(fh)
+    current_user = getpass.getuser()
+    print(current_user)
+    if current_user is 'root':
+        fh = RotatingFileHandler('/var/log/px-database-utility.log', maxBytes=10000, backupCount=1)
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+        log.addHandler(fh)
 
     # On Linux we engage syslog
     sh = SysLogHandler()

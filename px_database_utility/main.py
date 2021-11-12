@@ -1,6 +1,7 @@
 import json
 import logging
 import sys
+import getpass
 
 import pkg_resources
 
@@ -21,8 +22,10 @@ log = logging.getLogger(__name__)
 def main():
     log.info('------')
     log.info('Welcome to PantherX Database Utility v{}'.format(version))
-    log.info('v{}'.format(version))
     log.info('------')
+
+
+    current_user = getpass.getuser()
 
     pg_dump_is_installed = check_dependencies()
     if pg_dump_is_installed is False:
@@ -30,16 +33,18 @@ def main():
 
     cl_arguments = get_cl_arguments()
     operation = cl_arguments['operation']
-    database = cl_arguments['database']
     number_of_backups_to_keep = cl_arguments['keep']
     file = cl_arguments['file']
 
-    db = ConnectionDetails()
-    merge = ['host', 'port', 'username', 'password']
-
-    for prop in merge:
-        if cl_arguments[prop] is not None:
-            db[prop] = cl_arguments[prop]
+    db = ConnectionDetails(
+        host=cl_arguments['host'],
+        port=cl_arguments['port'],
+        dbname=cl_arguments['database'],
+        username=cl_arguments['username'],
+        password=cl_arguments['password'],
+        no_owner=cl_arguments['no_owner']
+    )
+    database = db.dbname
 
     if operation == 'BACKUP':
         db_array = []
@@ -61,7 +66,7 @@ def main():
 
         for db_for_backup in db_array:
             db.dbname = db_for_backup
-            backup_file = dump_schema(db)
+            backup_file = dump_schema(db, file)
             database_backup_files.append(backup_file)
 
             remove_old_backups(db_for_backup, number_of_backups_to_keep)

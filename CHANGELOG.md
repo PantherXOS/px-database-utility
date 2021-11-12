@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
-# [0.1.2]
+## [0.1.3]
+
+### Added
+
+- Support for `--no-owner` flag to ignore role on import and backup
+
+## [0.1.2]
+
+### Changed
 
 - Dropped binary psycopg2
 
-# [0.1.1]
+## [0.1.1]
 
 ### Fixed
 
