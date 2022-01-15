@@ -17,7 +17,6 @@ if opsys == 'Linux':
 
     # On Linux we log all events to file
     current_user = getpass.getuser()
-    print(current_user)
     if current_user is 'root':
         fh = RotatingFileHandler('/var/log/px-database-utility.log', maxBytes=10000, backupCount=1)
         fh.setLevel(logging.INFO)

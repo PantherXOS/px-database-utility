@@ -38,7 +38,7 @@ def dump_schema(db: 'ConnectionDetails', file: str = None):
 		output_path = file
 	
 	create_dump_path_if_does_not_exist(DEFAULT_DATABASE_DUMP_PATH)
-	log.info('=> Dumping database to {}'.format(file))
+	log.info('=> Dumping database to {}'.format(output_path))
 	command = f'pg_dump --host={db.host} ' \
 		f'--port={db.port} ' \
 		f'--dbname={db.dbname} ' \
@@ -190,15 +190,16 @@ def select_database(database_list):
 
 
 def select_database_backup(database_backup_list):
-	'''Prompt the user to select from a list of database'''
+	'''Prompt the user to select from a list of database backup'''
 
-	print('Found {} database. Select the one you would like to interact with.'.format(
-		len(database_backup_list)))
+	print('Found {} database backup. Select the one you would like to interact with.'.format(
+		len(database_backup_list)
+	))
 	count = 0
 	for file in database_backup_list:
 		print('{} {} - {}'.format(count, file, time.ctime(os.path.getctime(file))))
 		count += 1
 
 	selected_database = input(
-		'Which database do you want to work with?: (number) ')
+		'Which database backup do you want to work with?: (number) ')
 	return database_backup_list[int(selected_database)]
